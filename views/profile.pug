@@ -1,0 +1,11 @@
+extends layout
+
+block content
+	h1 Resonite User Profile
+	ul
+		li username: #{profile.username}
+		li id: #{profile.id}
+		li Tags:
+			ul
+				each val in profile.tags
+					li= val
