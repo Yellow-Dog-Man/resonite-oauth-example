@@ -7,5 +7,21 @@ block content
 		li id: #{profile.id}
 		li Tags:
 			ul
-				each val in profile.tags
-					li= val
+				if profile.tags && profile.tags.length
+					each val in profile.tags
+						li= val
+				else
+					li no tags
+	h2 Demo Tokens 
+	p This app, takes the first, token to load the above profile, but then instantly refreshes it. Below you should see two different fragments and two different expiry times. This indicates a successful refresh.
+
+	h3 Original Access Token
+	ul 
+		li Fragment: #{meta.access.tokenFragment}
+		li Expiry: #{meta.access.expires}
+	h3 Refreshed Access Token
+	ul 
+		li Fragment: #{meta.refresh.tokenFragment}
+		li Expiry: #{meta.refresh.expires}
+
+	a(href="/") Start Over

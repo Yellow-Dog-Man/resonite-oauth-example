@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const config = require('config');
-const fetch = require('node-fetch');
 
 const { AuthorizationCode } = require("simple-oauth2");
 
@@ -9,6 +8,7 @@ const oauthConfig = {
 	client: config.get('oauth'),
 	auth: {
 		tokenHost: "https://account.resonite.com/",
+		//tokenHost: "https://localhost:5001/",
 		authorizePath: "connect/authorize",
 		tokenPath: "connect/token",
 	},
@@ -20,7 +20,7 @@ const oauthConfig = {
 
 const redirectParams = {
 	redirect_uri: "http://localhost:8080",
-	scope: "profile",
+	scope: ["profile","offline_access"]
 };
 
 const client = new AuthorizationCode(oauthConfig);
@@ -58,8 +58,24 @@ router.get("/callback", async (req, res) => {
 
 		// Using the token we get the user's Resonite Profile
 		const profile = await getResoniteProfile(accessToken.token.access_token);
+
+		// Immediately attempt a refresh for demonstration purposes.
+		const refreshedToken = await accessToken.refresh();
+
+		const meta = {
+			access: {
+				tokenFragment: abbrev(accessToken.token.access_token),
+				expires : accessToken.token.expires_at
+			},
+			refresh: {
+				tokenFragment: abbrev(refreshedToken.token.access_token),
+				expires : refreshedToken.token.expires_at
+			}
+		}
+
 		res.render('profile', {
-			profile
+			profile,
+			meta
 		});
 
 	} catch (error) {
@@ -72,5 +88,9 @@ router.get("/callback", async (req, res) => {
 		return res.status(500).json("Authentication failed");
 	}
 });
+
+function abbrev(str) {
+	return str.substr(str.length - 6, str.length);
+}
 
 module.exports = router;
